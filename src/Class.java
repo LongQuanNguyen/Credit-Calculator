@@ -1,23 +1,24 @@
 public class Class {
-    private String className;
+    // class name = subject name + class level
+    private String subjectName;
     private int classLevel;
-    private int classCredit;
+    private double classCredit;
 
     private int classGrade;
 
-    public Class(String name, int level, int credit, int grade){
-        this.className = name;
+    public Class(String name, int level, int grade, double credit){
+        this.subjectName = name.toUpperCase();
         this.classLevel = level;
-        this.classCredit = credit;
         this.classGrade = grade;
+        this.classCredit = credit;
     }
 
-    public String getClassName(){
-        return this.className;
+    public String getSubjectName(){
+        return this.subjectName;
     }
 
-    public void setClassName(String newName){
-        this.className = newName;
+    public void setSubjectName(String newSubjectName){
+        this.subjectName = newSubjectName.toUpperCase();
     }
 
     public int getClassLevel(){
@@ -28,7 +29,7 @@ public class Class {
         this.classLevel = newLevel;
     }
 
-    public int getClassCredit() {
+    public double getClassCredit() {
         return classCredit;
     }
 
@@ -44,8 +45,12 @@ public class Class {
         this.classGrade = newGrade;
     }
 
+    public String getClassName(){
+        return this.subjectName + " " + this.classLevel;
+    }
+
     public String toString(){
-        return "Name: " + this.className + " | Level: " + this.classLevel + " | Credit: " + this.classCredit + " | Grade: " + this.classGrade;
+        return "Name:  " + this.getClassName() + "  |  Credit:  " + this.classCredit + "  |  Grade:  " + this.classGrade;
     }
 
     /**
@@ -54,11 +59,11 @@ public class Class {
     public static void main(String[] args){
         Class aClass = new Class("math", 225, 3, 87);
         System.out.println(aClass.toString());
-        System.out.println(aClass.getClassName());
+        System.out.println(aClass.getSubjectName());
         System.out.println(aClass.getClassLevel());
         System.out.println(aClass.getClassCredit());
         System.out.println(aClass.getClassGrade());
-        aClass.setClassName("cmpt");
+        aClass.setSubjectName("cmpt");
         aClass.setClassLevel(270);
         aClass.setClassCredit(1);
         aClass.setClassGrade(90);

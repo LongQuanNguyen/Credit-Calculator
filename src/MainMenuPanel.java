@@ -38,7 +38,7 @@ public class MainMenuPanel extends JPanel {
              AddClassText.setBounds(20, 60, 330, 15);
              add(AddClassText);
 
-             JLabel AddClassTexts = new JLabel("      Name                Level                Credit               Grade");
+             JLabel AddClassTexts = new JLabel("    Subject               Level                Grade                Credit");
              AddClassTexts.setBounds(20, 85, 330, 15);
              add(AddClassTexts);
 
@@ -50,13 +50,14 @@ public class MainMenuPanel extends JPanel {
              levelInput.setBounds(100, 105, 70, 20);
              add(levelInput);
 
-             JTextField creditInput = new JTextField();
-             creditInput.setBounds(180, 105, 70, 20);
-             add(creditInput);
-
              JTextField gradeInput = new JTextField();
-             gradeInput.setBounds(260, 105, 70, 20);
+             gradeInput.setBounds(180, 105, 70, 20);
              add(gradeInput);
+
+             String creditOptions[] = {"3", "1.5", "1", ""};
+             JComboBox credChoice = new JComboBox(creditOptions);
+             credChoice.setBounds(260, 105, 70, 20);
+             add(credChoice);
 
              JButton AddClassButton = new JButton("Add Class");
              AddClassButton.setBounds(360, 60, 100, 65);
@@ -65,21 +66,40 @@ public class MainMenuPanel extends JPanel {
                  @Override
                  public void actionPerformed(ActionEvent event) {
                      try {
-                         String name = nameInput.getText();
+                         String name = nameInput.getText().toUpperCase();
                          int level = Integer.parseInt(levelInput.getText());
-                         int credit = Integer.parseInt(creditInput.getText());
                          int grade = Integer.parseInt(gradeInput.getText());
-                         Class a_class = new Class(name, level, credit, grade);
-                         P.addClass(a_class);
+                         double credit;
+                         String select = (String)credChoice.getSelectedItem();
+                         if (select == "3") {
+                             credit = 3;
+                         } else if (select == "1.5") {
+                             credit = 1.5;
+                         } else if (select == "1") {
+                             credit = 1;
+                         } else {
+                             credit = 0;
+                         }
+                         if (P.hasClass(nameInput.getText().toUpperCase() + " " + levelInput.getText())){
+                             JFrame warningDialog = new JFrame();
+                             JOptionPane.showMessageDialog(warningDialog, nameInput.getText().toUpperCase() + " " + levelInput.getText() + " is already in the system!", "Alert", JOptionPane.WARNING_MESSAGE);
+                         }else {
+                             Class a_class = new Class(name, level, grade, credit);
+                             P.addClass(a_class);
+                         }
                          nameInput.setText(null);
                          levelInput.setText(null);
-                         creditInput.setText(null);
                          gradeInput.setText(null);
                      } catch (NumberFormatException e) {
-                         nameInput.setText("   ERROR ");
-                         levelInput.setText("Integer only");
-                         creditInput.setText("Integer only");
-                         gradeInput.setText("Integer only");
+                         JFrame messageDialog = new JFrame();
+                         JOptionPane.showMessageDialog(messageDialog, "Input error occurred!\n" +
+                                 "\nINPUT USAGE: "+
+                                 "\n<Subject> : name code for the class subject"+
+                                 "\n<Level> : must be three-digits numeric values" +
+                                 "\n<Grade> : must be numeric values","Alert", JOptionPane.WARNING_MESSAGE);
+                         nameInput.setText(null);
+                         levelInput.setText(null);
+                         gradeInput.setText(null);
                      }
                  }
              });
@@ -87,7 +107,7 @@ public class MainMenuPanel extends JPanel {
 
          // DROP CLASS
          {
-             JLabel RemoveClassText = new JLabel("Enter the class level number to remove:");
+             JLabel RemoveClassText = new JLabel("Enter class name to remove:      (Subject + level)");
              RemoveClassText.setBounds(20, 153, 310, 15);
              add(RemoveClassText);
 
@@ -102,16 +122,17 @@ public class MainMenuPanel extends JPanel {
              RemoveClassButton.addActionListener(new ActionListener() {
                  @Override
                  public void actionPerformed(ActionEvent event) {
-                     try {
-                         int classLevel = Integer.parseInt(RemoveClassInput.getText());
-                         if (!P.hasClassLevel(classLevel)) {
-                             RemoveClassInput.setText("There is no class level " + classLevel + " in the system!");
-                         } else {
-                             P.removeClass(classLevel);
-                             RemoveClassInput.setText(null);
-                         }
-                     } catch (NumberFormatException e) {
-                         RemoveClassInput.setText("A numeric input is required!");
+                     String className = RemoveClassInput.getText().toUpperCase();
+                     if (!P.hasClass(className)) {
+                         JFrame messageDialog = new JFrame();
+                         JOptionPane.showMessageDialog(messageDialog, "There is no " + className + " class in the system!\n" +
+                                 "\nINPUT USAGE: <subject name> + space + <class level>"+
+                                 "\n<subject name> : name code for the class subject"+
+                                 "\n<class level> : must be three-digits numeric values", "Alert", JOptionPane.WARNING_MESSAGE);
+                         RemoveClassInput.setText(null);
+                     } else {
+                         P.removeClass(className);
+                         RemoveClassInput.setText(null);
                      }
                  }
              });
@@ -135,16 +156,17 @@ public class MainMenuPanel extends JPanel {
                  @Override
                  public void actionPerformed(ActionEvent e) {
                     if(NameFile.getText().equals("")){
-                        NameFile.setText("File name can not be empty!");
-                    } else if (!NameFile.getText().equals("File name can not be empty!") && !NameFile.getText().equals("")) {
+                        JFrame warningDialog = new JFrame();
+                        JOptionPane.showMessageDialog(warningDialog, "File name can not be empty!", "Alert", JOptionPane.WARNING_MESSAGE);
+                    } else if (!NameFile.getText().equals("")) {
                         PrintFileCreate outputFile = new PrintFileCreate();
                         outputFile.fileCreate(NameFile.getText());
                         outputFile.fileWrite(P.toString());
 
                         JFrame messageDialog = new JFrame();
                         JOptionPane.showMessageDialog(messageDialog, outputFile.getFileStatus());
-
                     }
+                     NameFile.setText(null);
                  }
              });
          }
@@ -181,7 +203,11 @@ public class MainMenuPanel extends JPanel {
                      if (P.getProgram().equals("unspecified program")){
                          JOptionPane.showMessageDialog(messageDialog, "Degree type is not specified!", "Alert",JOptionPane.WARNING_MESSAGE);
                      } else {
-                         JOptionPane.showMessageDialog(messageDialog, P.progressPercentage() + " of your degree");
+                         String message = P.progressPercentage() + "\n";
+                         message += "\nYou have taken  <" + P.getTotalClass() + ">  classes.";
+                         message += "\nYou have total of  <" + P.getTotalCredit() + "/" + P.getTotalRequireCredit() + ">  required credit.";
+                         message += "\nYou have  <" + P.getTotalSeniorCredit() + "/" + P.getSeniorRequiredCredit() + ">  required senior credit.";
+                         JOptionPane.showMessageDialog(messageDialog, message);
                      }
                  }
              });

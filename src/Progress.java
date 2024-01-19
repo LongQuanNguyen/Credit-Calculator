@@ -2,23 +2,27 @@ import java.util.NoSuchElementException;
 import java.util.TreeMap;
 
 public class Progress {
-    private TreeMap<Integer, Class> ClassMap;
+    private TreeMap<String, Class> ClassMap;
 
     private int totalRequireCredit;
+
+    private int seniorRequiredCredit;
 
     public Progress(){
         this.ClassMap = new TreeMap<>();
         this.totalRequireCredit = 0;
     }
 
-    public boolean hasClassLevel(int aClassLevel){
-        return ClassMap.containsKey(aClassLevel);
+    public boolean hasClass(String aClassName){
+        return ClassMap.containsKey(aClassName.toUpperCase());
     }
 
     public void setTotalRequireCredit(int numOfYear){
         if(numOfYear == 3){
+            this.seniorRequiredCredit = 42;
             this.totalRequireCredit = 90;
         } else if (numOfYear == 4) {
+            this.seniorRequiredCredit = 66;
             this.totalRequireCredit = 120;
         } else {
             this.totalRequireCredit = 0;
@@ -26,31 +30,35 @@ public class Progress {
     }
 
     public void addClass(Class aClass){
-        if (ClassMap.containsKey(aClass.getClassLevel())){
-            throw new IllegalStateException(" Class " + aClass.getClassName() + " " + aClass.getClassLevel() + " is already in the system!");
+        if (ClassMap.containsKey(aClass.getClassName())){
+            throw new IllegalStateException(" Class " + aClass.getClassName() + " is already in the system!");
         }
-        ClassMap.put(aClass.getClassLevel(), aClass);
+        ClassMap.put(aClass.getClassName(), aClass);
     }
 
-    public void removeClass(int classDropLevel){
-        if (!ClassMap.containsKey(classDropLevel)){
-            throw new NoSuchElementException(" Class level " + classDropLevel +" is not in the system!");
+    public void removeClass(String aClassName){
+        if (!ClassMap.containsKey(aClassName.toUpperCase())){
+            throw new NoSuchElementException(aClassName +" is not in the system!");
         } else {
-            ClassMap.remove(classDropLevel);
+            ClassMap.remove(aClassName.toUpperCase());
         }
     }
 
     public int getTotalCredit(){
-        int totalCredit = 0;
-        for (Integer key : ClassMap.keySet()){
+        double totalCredit = 0;
+        for (String key : ClassMap.keySet()){
             totalCredit += ClassMap.get(key).getClassCredit();
         }
-        return totalCredit;
+        return (int)totalCredit;
+    }
+
+    public int getSeniorRequiredCredit(){
+        return this.seniorRequiredCredit;
     }
 
     public int getTotalClass(){
         int totalClass = 0;
-        for (Integer key : ClassMap.keySet()){
+        for (String key : ClassMap.keySet()){
             totalClass += 1;
         }
         return totalClass;
@@ -66,16 +74,20 @@ public class Progress {
         }
     }
 
+    public int getTotalRequireCredit(){
+        return this.totalRequireCredit;
+    }
+
     public String progressPercentage(){
         float completedPercentage = (float)getTotalCredit() / (float)this.totalRequireCredit * 100;
         String completed = String.format("%.2f", completedPercentage);
-        return "You have completed " + completed + " %";
+        return "You have completed <" + completed + "%> of your degree.";
     }
 
-    public int getTotalSeniorCredit(){
-        int senCred = 0;
-        for(int key : ClassMap.keySet()){
-            if(key >= 200){
+    public double getTotalSeniorCredit(){
+        double senCred = 0;
+        for(String key : ClassMap.keySet()){
+            if(ClassMap.get(key).getClassLevel() >= 200){
                 senCred += ClassMap.get(key).getClassCredit();
             }
         }
@@ -84,7 +96,7 @@ public class Progress {
 
     public String getClassList() {
         String result = "";
-        for (Integer key : ClassMap.keySet()){
+        for (String key : ClassMap.keySet()){
             result += "\t" + ClassMap.get(key).toString() + "\n";
         }
         return result;
@@ -92,19 +104,19 @@ public class Progress {
 
     public int getAverage(){
         int totalGrade = 0;
-        for (Integer key : ClassMap.keySet()){
+        for (String key : ClassMap.keySet()){
             totalGrade += ClassMap.get(key).getClassGrade();
         }
-        int Average = (int)((float)totalGrade / (float)this.getTotalClass());
+        int Average = (int)((double)totalGrade / (double)this.getTotalClass());
         return Average;
     }
 
     public String toString(){
         String result = "";
-        result += "You are in a " + this.getProgram() + ", with total <" + this.totalRequireCredit + "> required credits. Your current average is <" + this.getAverage() + ">.\n";
-        result += "You are taking or have taken <" + getTotalClass() + "> classes resulting in <" + this.getTotalCredit() + "> credits, <" + this.getTotalSeniorCredit() + "> of which are senior credits.\nThey are:\n";
+        result += "You are in a(n) " + this.getProgram() + ". Require total of <" + this.totalRequireCredit + "> credits, <" + this.seniorRequiredCredit + "> of which are senior credits (> 200 level).";
+        result += "\nYour current average is <" + this.getAverage() + ">. " + this.progressPercentage();
+        result += "\nYou are taken <" + getTotalClass() + "> classes resulting in <" + this.getTotalCredit() + "> credits, <" + this.getTotalSeniorCredit() + "> of which are senior credits.\nThey are:\n";
         result += this.getClassList();
-        result += this.progressPercentage() + "\n";
         return result;
     }
 
@@ -120,8 +132,9 @@ public class Progress {
         test.addClass(c3);
         test.addClass(c4);
         System.out.println(test.toString());
-        System.out.println("Has 226? " + test.hasClassLevel(226));
-        test.removeClass(225);
+        System.out.println("Has Cmpt 226? " + test.hasClass("Cmpt 226"));
+        System.out.println("Has Cmpt 214? " + test.hasClass("Cmpt 214"));
+        test.removeClass("Cmpt 214");
         System.out.println(test.toString());
     }
 }
